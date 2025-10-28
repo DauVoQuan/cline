@@ -36,6 +36,10 @@ export function stopTelegramBot() {
 }
 
 // Gửi message hello (giữ lại cho tương thích)
-export function sendHelloMessage(chatId: string) {
-  return sendTelegramMessage(chatId, 'hello');
+export async function sendHelloMessage(chatId: string) {
+  const now = new Date();
+  const dateStr = now.toLocaleString("vi-VN", { hour12: false });
+  const helloMsg = `QuanDV chatbot xin chào - ${dateStr}`;
+  await sendTelegramMessage(chatId, helloMsg);
 }
+

@@ -1,3 +1,99 @@
+// --- Telegram AI reply helpers ---
+import { sendTelegramMessage } from "@/integrations/telegram/telegramBot"
+
+/** Kiểm tra message có phải là phản hồi AI hợp lệ để gửi về Telegram không */
+/**
+ * Kiểm tra message có phải là phản hồi AI hợp lệ để gửi về Telegram không
+ * Gửi nếu:
+ *   - type === 'say' && (say === 'text' || say === 'completion_result') && !partial && text hợp lệ
+ *   - hoặc type === 'ask' && text hợp lệ
+ */
+function extractAiReplyMessage(msg) {
+       return (
+	       msg &&
+	       (
+		       (msg.type === "say" && (msg.say === "text" || msg.say === "completion_result")) ||
+		       (msg.type === "ask")
+	       ) &&
+	       !msg.partial &&
+	       typeof msg.text === "string" &&
+	       msg.text.trim() !== ""
+       )
+}
+
+/** Format nội dung message gửi về Telegram (đặc biệt cho type 'ask') */
+function formatTelegramMessage(msg: any): string {
+       // Nếu text là JSON object có các trường đặc biệt thì format lại
+       if (typeof msg.text === "string") {
+	       try {
+		       const data = JSON.parse(msg.text)
+		       let result = ""
+		       // Ưu tiên: response, question, options
+		       if (typeof data.response === "string" && data.response.trim() !== "") {
+			       result += data.response + "\n"
+		       }
+		       if (typeof data.question === "string" && data.question.trim() !== "") {
+			       result += data.question + "\n"
+		       }
+		       if (Array.isArray(data.options) && data.options.length > 0) {
+			       result += data.options.map((opt: string, idx: number) => `  ${idx + 1}. ${opt}`).join("\n")
+		       }
+		       // Nếu chỉ có 1 trường (response/question) thì vẫn trả về
+		       return result.trim() || msg.text
+	       } catch {
+		       // Nếu không parse được thì trả về text gốc
+		       return msg.text
+	       }
+       }
+       // Mặc định trả về text
+       return msg.text
+}
+
+/** Gửi text về Telegram Bot, tự động format nếu là message 'ask' */
+async function sendAiReplyToTelegram(textOrMsg: any) {
+       if (
+	       TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID &&
+	       TELEGRAM_BOT_TOKEN !== "<YOUR_BOT_TOKEN_HERE>" &&
+	       TELEGRAM_CHAT_ID !== "<YOUR_CHAT_ID_HERE>"
+       ) {
+	       try {
+		       // Nếu truyền vào là object message thì format, nếu là string thì gửi luôn
+		       const text = typeof textOrMsg === "object" && textOrMsg !== null ? formatTelegramMessage(textOrMsg) : textOrMsg
+		       await sendTelegramMessage(TELEGRAM_CHAT_ID, text)
+		       Logger.log(`[Telegram] Đã gửi phản hồi AI về Telegram: ${text}`)
+	       } catch (err) {
+		       Logger.log(`[Telegram] Lỗi khi gửi phản hồi AI về Telegram: ${err}`)
+	       }
+       }
+}
+
+/** Theo dõi clineMessages, khi có message AI mới thì gửi về Telegram */
+function subscribeAiReplyToTelegram(controller) {
+       let lastMessageTs = 0
+       setInterval(() => {
+	       try {
+		       const messages = controller?.task?.messageStateHandler?.getClineMessages?.() || []
+		       const lastMsg = messages[messages.length - 1]
+		       Logger.log(`[Telegram][Debug] Số lượng messages: ${messages.length}`)
+		       if (lastMsg) {
+			       Logger.log(`[Telegram][Debug] Last message: ${JSON.stringify({ts: lastMsg.ts, type: lastMsg.type, say: lastMsg.say, partial: lastMsg.partial, text: lastMsg.text})}`)
+			       if (lastMsg.ts !== lastMessageTs) {
+				       if (extractAiReplyMessage(lastMsg)) {
+					       lastMessageTs = lastMsg.ts
+							   Logger.log(`[Telegram][Debug] Gửi phản hồi AI về Telegram: ${lastMsg.text}`)
+							   sendAiReplyToTelegram(lastMsg)
+				       } else {
+					       Logger.log(`[Telegram][Debug] Message không hợp lệ để gửi về Telegram.`)
+				       }
+			       }
+		       } else {
+			       Logger.log(`[Telegram][Debug] Không có message nào trong danh sách.`)
+		       }
+	       } catch (err) {
+		       Logger.log(`[Telegram] Lỗi khi theo dõi AI reply: ${err}`)
+	       }
+       }, 1000) // Kiểm tra mỗi 1s, có thể tối ưu sau
+}
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 
@@ -76,6 +172,11 @@ export async function activate(context: vscode.ExtensionContext) {
 					   const webview = (await import("./core/webview")).WebviewProvider.getInstance()
 					   const controller = webview?.controller
 					   if (controller) {
+						   // Đăng ký theo dõi AI reply về Telegram (chỉ đăng ký 1 lần)
+						   if (!controller.__telegramAiReplySubscribed) {
+							   subscribeAiReplyToTelegram(controller)
+							   controller.__telegramAiReplySubscribed = true
+						   }
 						   // Nếu chưa có task, tạo task mới với nội dung đầu tiên là message Telegram
 						   if (!controller.task) {
 							   await controller.handleTaskCreation(msg.text || "")
