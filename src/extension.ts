@@ -1,5 +1,5 @@
 // --- Telegram AI reply helpers ---
-import { sendTelegramMessage } from "@/integrations/telegram/telegramBot"
+import { sendTelegramMessage } from "@/integrations/telegram/telegramBot";
 
 /** Kiểm tra message có phải là phản hồi AI hợp lệ để gửi về Telegram không */
 /**
@@ -23,30 +23,59 @@ function extractAiReplyMessage(msg) {
 
 /** Format nội dung message gửi về Telegram (đặc biệt cho type 'ask') */
 function formatTelegramMessage(msg: any): string {
-       // Nếu text là JSON object có các trường đặc biệt thì format lại
-       if (typeof msg.text === "string") {
-	       try {
-		       const data = JSON.parse(msg.text)
-		       let result = ""
-		       // Ưu tiên: response, question, options
-		       if (typeof data.response === "string" && data.response.trim() !== "") {
-			       result += data.response + "\n"
-		       }
-		       if (typeof data.question === "string" && data.question.trim() !== "") {
-			       result += data.question + "\n"
-		       }
-		       if (Array.isArray(data.options) && data.options.length > 0) {
-			       result += data.options.map((opt: string, idx: number) => `  ${idx + 1}. ${opt}`).join("\n")
-		       }
-		       // Nếu chỉ có 1 trường (response/question) thì vẫn trả về
-		       return result.trim() || msg.text
-	       } catch {
-		       // Nếu không parse được thì trả về text gốc
-		       return msg.text
-	       }
-       }
-       // Mặc định trả về text
-       return msg.text
+	// Nếu là message xác nhận (type 'ask') thì format rõ ràng cho Telegram
+	if (msg && msg.type === 'ask') {
+		let confirmText = '';
+		// Nếu text là JSON object có trường question/command
+		if (typeof msg.text === 'string') {
+			try {
+				const data = JSON.parse(msg.text);
+				let question = typeof data.question === 'string' ? data.question : '';
+				let command = typeof data.command === 'string' ? data.command : '';
+				// Loại bỏ các ký tự không mong muốn như REQ_APP ở cuối chuỗi
+				question = question.replace(/REQ_APP$/g, '').trim();
+				command = command.replace(/REQ_APP$/g, '').trim();
+				if (question) {
+					confirmText += `AI yêu cầu xác nhận: ${question}\n`;
+				}
+				if (command) {
+					confirmText += `Lệnh: ${command}\n`;
+				}
+				if (Array.isArray(data.options) && data.options.length > 0) {
+					confirmText += data.options.map((opt, idx) => `  ${idx + 1}. ${opt}`).join("\n") + '\n';
+				}
+				confirmText = confirmText.trim();
+				if (confirmText) {
+					confirmText += '\nBạn có muốn thực hiện không? (trả lời yes hoặc no)';
+					return confirmText;
+				}
+			} catch {}
+		}
+		// Nếu không parse được hoặc không có trường đặc biệt, gửi text gốc kèm hướng dẫn
+		let cleanText = (msg.text || '').replace(/REQ_APP$/g, '').trim();
+		return `AI yêu cầu xác nhận: ${cleanText}\nBạn có muốn thực hiện không? (trả lời yes hoặc no)`;
+	}
+	// Nếu text là JSON object có các trường đặc biệt thì format lại (giữ logic cũ cho 'say')
+	if (typeof msg.text === "string") {
+		try {
+			const data = JSON.parse(msg.text);
+			let result = "";
+			if (typeof data.response === "string" && data.response.trim() !== "") {
+				result += data.response + "\n";
+			}
+			if (typeof data.question === "string" && data.question.trim() !== "") {
+				result += data.question + "\n";
+			}
+			if (Array.isArray(data.options) && data.options.length > 0) {
+				result += data.options.map((opt: string, idx: number) => `  ${idx + 1}. ${opt}`).join("\n");
+			}
+			return result.trim() || msg.text;
+		} catch {
+			return msg.text;
+		}
+	}
+	// Mặc định trả về text
+	return msg.text;
 }
 
 /** Gửi text về Telegram Bot, tự động format nếu là message 'ask' */
@@ -69,74 +98,88 @@ async function sendAiReplyToTelegram(textOrMsg: any) {
 
 /** Theo dõi clineMessages, khi có message AI mới thì gửi về Telegram */
 function subscribeAiReplyToTelegram(controller) {
-       let lastMessageTs = 0
-       setInterval(() => {
-	       try {
-		       const messages = controller?.task?.messageStateHandler?.getClineMessages?.() || []
-		       const lastMsg = messages[messages.length - 1]
-		       Logger.log(`[Telegram][Debug] Số lượng messages: ${messages.length}`)
-		       if (lastMsg) {
-			       Logger.log(`[Telegram][Debug] Last message: ${JSON.stringify({ts: lastMsg.ts, type: lastMsg.type, say: lastMsg.say, partial: lastMsg.partial, text: lastMsg.text})}`)
-			       if (lastMsg.ts !== lastMessageTs) {
-				       if (extractAiReplyMessage(lastMsg)) {
-					       lastMessageTs = lastMsg.ts
-							   Logger.log(`[Telegram][Debug] Gửi phản hồi AI về Telegram: ${lastMsg.text}`)
-							   sendAiReplyToTelegram(lastMsg)
-				       } else {
-					       Logger.log(`[Telegram][Debug] Message không hợp lệ để gửi về Telegram.`)
-				       }
-			       }
-		       } else {
-			       Logger.log(`[Telegram][Debug] Không có message nào trong danh sách.`)
-		       }
-	       } catch (err) {
-		       Logger.log(`[Telegram] Lỗi khi theo dõi AI reply: ${err}`)
-	       }
-       }, 1000) // Kiểm tra mỗi 1s, có thể tối ưu sau
+	let lastMessageTs = 0;
+	let askMessageQueue = [];
+	setInterval(() => {
+		try {
+			const messages = controller?.task?.messageStateHandler?.getClineMessages?.() || [];
+			if (messages.length === 0) {
+				Logger.log(`[Telegram][Debug] Không có message nào trong danh sách.`);
+				return;
+			}
+			// Tìm các message mới (ts > lastMessageTs), gửi lần lượt lên Telegram
+			const newMessages = messages.filter(m => m.ts > lastMessageTs && extractAiReplyMessage(m));
+			if (newMessages.length > 0) {
+				for (const msg of newMessages) {
+					Logger.log(`[Telegram][Debug] Gửi phản hồi AI về Telegram: ${msg.text}`);
+					if (msg.type === 'ask') {
+						// Workaround: delay 1000ms, nếu không có message 'say' mới thì mới gửi hướng dẫn xác nhận
+						askMessageQueue.push({msg, ts: msg.ts});
+						setTimeout(() => {
+							// Kiểm tra nếu sau 1000ms không có message 'say' mới hơn msg.ts thì gửi hướng dẫn xác nhận
+							const latestMessages = controller?.task?.messageStateHandler?.getClineMessages?.() || [];
+							const hasSayAfter = latestMessages.some(m2 => m2.ts > msg.ts && m2.type === 'say');
+							if (!hasSayAfter) {
+								sendAiReplyToTelegram(msg);
+								Logger.log(`[Telegram][Debug] ĐÃ gửi hướng dẫn xác nhận cho ask ts=${msg.ts}`);
+							} else {
+								Logger.log(`[Telegram][Debug] BỎ QUA gửi xác nhận ask ts=${msg.ts} vì AI đã tự động tiếp tục.`);
+							}
+						}, 1000);
+					} else {
+						sendAiReplyToTelegram(msg);
+					}
+					lastMessageTs = Math.max(lastMessageTs, msg.ts);
+				}
+			}
+		} catch (err) {
+			Logger.log(`[Telegram] Lỗi khi theo dõi AI reply: ${err}`);
+		}
+	}, 1000); // Kiểm tra mỗi 1s
 }
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 
-import assert from "node:assert"
-import { DIFF_VIEW_URI_SCHEME } from "@hosts/vscode/VscodeDiffViewProvider"
-import * as vscode from "vscode"
-import { sendAccountButtonClickedEvent } from "./core/controller/ui/subscribeToAccountButtonClicked"
-import { sendChatButtonClickedEvent } from "./core/controller/ui/subscribeToChatButtonClicked"
-import { sendHistoryButtonClickedEvent } from "./core/controller/ui/subscribeToHistoryButtonClicked"
-import { sendMcpButtonClickedEvent } from "./core/controller/ui/subscribeToMcpButtonClicked"
-import { sendSettingsButtonClickedEvent } from "./core/controller/ui/subscribeToSettingsButtonClicked"
-import { WebviewProvider } from "./core/webview"
-import { createClineAPI } from "./exports"
-import { Logger } from "./services/logging/Logger"
-import { cleanupTestMode, initializeTestMode } from "./services/test/TestMode"
+import assert from "node:assert";
+import { DIFF_VIEW_URI_SCHEME } from "@hosts/vscode/VscodeDiffViewProvider";
+import * as vscode from "vscode";
+import { sendAccountButtonClickedEvent } from "./core/controller/ui/subscribeToAccountButtonClicked";
+import { sendChatButtonClickedEvent } from "./core/controller/ui/subscribeToChatButtonClicked";
+import { sendHistoryButtonClickedEvent } from "./core/controller/ui/subscribeToHistoryButtonClicked";
+import { sendMcpButtonClickedEvent } from "./core/controller/ui/subscribeToMcpButtonClicked";
+import { sendSettingsButtonClickedEvent } from "./core/controller/ui/subscribeToSettingsButtonClicked";
+import { WebviewProvider } from "./core/webview";
+import { createClineAPI } from "./exports";
+import { Logger } from "./services/logging/Logger";
+import { cleanupTestMode, initializeTestMode } from "./services/test/TestMode";
 import "./utils/path"; // necessary to have access to String.prototype.toPosix
 
-import path from "node:path"
-import type { ExtensionContext } from "vscode"
-import { HostProvider } from "@/hosts/host-provider"
-import { vscodeHostBridgeClient } from "@/hosts/vscode/hostbridge/client/host-grpc-client"
-import { readTextFromClipboard, writeTextToClipboard } from "@/utils/env"
-import { initialize, tearDown } from "./common"
-import { addToCline } from "./core/controller/commands/addToCline"
-import { explainWithCline } from "./core/controller/commands/explainWithCline"
-import { fixWithCline } from "./core/controller/commands/fixWithCline"
-import { improveWithCline } from "./core/controller/commands/improveWithCline"
-import { sendAddToInputEvent } from "./core/controller/ui/subscribeToAddToInput"
-import { sendFocusChatInputEvent } from "./core/controller/ui/subscribeToFocusChatInput"
-import { workspaceResolver } from "./core/workspace"
-import { focusChatInput, getContextForCommand } from "./hosts/vscode/commandUtils"
-import { abortCommitGeneration, generateCommitMessage } from "./hosts/vscode/commit-message-generator"
-import { VscodeDiffViewProvider } from "./hosts/vscode/VscodeDiffViewProvider"
-import { VscodeWebviewProvider } from "./hosts/vscode/VscodeWebviewProvider"
-import { ExtensionRegistryInfo } from "./registry"
-import { AuthService } from "./services/auth/AuthService"
-import { LogoutReason } from "./services/auth/types"
-import { telemetryService } from "./services/telemetry"
-import { SharedUriHandler } from "./services/uri/SharedUriHandler"
-import { ShowMessageType } from "./shared/proto/host/window"
-import { fileExistsAtPath } from "./utils/fs"
-import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from "@/integrations/telegram/config"
-import { initTelegramBot, sendHelloMessage } from "@/integrations/telegram/telegramBot"
+import path from "node:path";
+import type { ExtensionContext } from "vscode";
+import { HostProvider } from "@/hosts/host-provider";
+import { vscodeHostBridgeClient } from "@/hosts/vscode/hostbridge/client/host-grpc-client";
+import { readTextFromClipboard, writeTextToClipboard } from "@/utils/env";
+import { initialize, tearDown } from "./common";
+import { addToCline } from "./core/controller/commands/addToCline";
+import { explainWithCline } from "./core/controller/commands/explainWithCline";
+import { fixWithCline } from "./core/controller/commands/fixWithCline";
+import { improveWithCline } from "./core/controller/commands/improveWithCline";
+import { sendAddToInputEvent } from "./core/controller/ui/subscribeToAddToInput";
+import { sendFocusChatInputEvent } from "./core/controller/ui/subscribeToFocusChatInput";
+import { workspaceResolver } from "./core/workspace";
+import { focusChatInput, getContextForCommand } from "./hosts/vscode/commandUtils";
+import { abortCommitGeneration, generateCommitMessage } from "./hosts/vscode/commit-message-generator";
+import { VscodeDiffViewProvider } from "./hosts/vscode/VscodeDiffViewProvider";
+import { VscodeWebviewProvider } from "./hosts/vscode/VscodeWebviewProvider";
+import { ExtensionRegistryInfo } from "./registry";
+import { AuthService } from "./services/auth/AuthService";
+import { LogoutReason } from "./services/auth/types";
+import { telemetryService } from "./services/telemetry";
+import { SharedUriHandler } from "./services/uri/SharedUriHandler";
+import { ShowMessageType } from "./shared/proto/host/window";
+import { fileExistsAtPath } from "./utils/fs";
+import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from "@/integrations/telegram/config";
+import { initTelegramBot, sendHelloMessage } from "@/integrations/telegram/telegramBot";
 /*
 Built using https://github.com/microsoft/vscode-webview-ui-toolkit
 
@@ -177,12 +220,41 @@ export async function activate(context: vscode.ExtensionContext) {
 							   subscribeAiReplyToTelegram(controller)
 							   controller.__telegramAiReplySubscribed = true
 						   }
-						   // Nếu chưa có task, tạo task mới với nội dung đầu tiên là message Telegram
-						   if (!controller.task) {
-							   await controller.handleTaskCreation(msg.text || "")
+						   const text = (msg.text || '').trim().toLowerCase();
+						   if (text === '/yes' || text === '/no' || text === '/cancel' || text === '/resume') {
+							   if (controller.task) {
+								   if (text === '/yes') {
+									   await controller.task.handleWebviewAskResponse('yesButtonClicked', '')
+									   Logger.log(`[Telegram] Đã gửi xác nhận yesButtonClicked về Cline.`)
+								   } else if (text === '/no') {
+									   await controller.task.handleWebviewAskResponse('noButtonClicked', '')
+									   Logger.log(`[Telegram] Đã gửi xác nhận noButtonClicked về Cline.`)
+								   } else if (text === '/cancel') {
+									   if (typeof controller.task.abortTask === 'function') {
+										   await controller.task.abortTask()
+										   Logger.log(`[Telegram] Đã gửi lệnh abortTask về Cline.`)
+									   } else {
+										   Logger.log(`[Telegram] Task không hỗ trợ abortTask.`)
+									   }
+								   } else if (text === '/resume') {
+									   if (typeof controller.task.resumeTask === 'function') {
+										   await controller.task.resumeTask()
+										   Logger.log(`[Telegram] Đã gửi lệnh resumeTask về Cline.`)
+									   } else {
+										   Logger.log(`[Telegram] Task không hỗ trợ resumeTask.`)
+									   }
+								   }
+							   } else {
+								   Logger.log(`[Telegram] Không tìm thấy task để xác nhận (${text}).`);
+							   }
 						   } else {
-							   // Gửi message như user gửi để AI trả lời
-							   await controller.task.handleWebviewAskResponse("messageResponse", msg.text || "")
+							   // Nếu chưa có task, tạo task mới với nội dung đầu tiên là message Telegram
+							   if (!controller.task) {
+								   await controller.handleTaskCreation(msg.text || "")
+							   } else {
+								   // Gửi message như user gửi để AI trả lời
+								   await controller.task.handleWebviewAskResponse("messageResponse", msg.text || "")
+							   }
 						   }
 					   } else {
 						   Logger.log("Không tìm thấy controller khi nhận message Telegram.")
