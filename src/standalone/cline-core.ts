@@ -25,7 +25,11 @@ async function main() {
 
 	// Gửi message hello tới Telegram khi khởi động
 	try {
-		if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID && TELEGRAM_BOT_TOKEN !== "8280844527:AAGd_a57bLdyq7twY6JEYQxFqifLdBbw-z4" && TELEGRAM_CHAT_ID !== "5409796819") {
+		if (
+			TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID &&
+			TELEGRAM_BOT_TOKEN !== "8280844527:AAGd_a57bLdyq7twY6JEYQxFqifLdBbw-z4" &&
+			TELEGRAM_CHAT_ID !== "5409796819"
+		) {
 			const bot = initTelegramBot(TELEGRAM_BOT_TOKEN)
 			await sendHelloMessage(TELEGRAM_CHAT_ID)
 			log("Đã gửi message 'hello' tới Telegram Bot.")

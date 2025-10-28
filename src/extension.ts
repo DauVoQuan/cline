@@ -13,7 +13,7 @@ import { WebviewProvider } from "./core/webview"
 import { createClineAPI } from "./exports"
 import { Logger } from "./services/logging/Logger"
 import { cleanupTestMode, initializeTestMode } from "./services/test/TestMode"
-import "./utils/path" // necessary to have access to String.prototype.toPosix
+import "./utils/path"; // necessary to have access to String.prototype.toPosix
 
 import path from "node:path"
 import type { ExtensionContext } from "vscode"
@@ -39,6 +39,8 @@ import { telemetryService } from "./services/telemetry"
 import { SharedUriHandler } from "./services/uri/SharedUriHandler"
 import { ShowMessageType } from "./shared/proto/host/window"
 import { fileExistsAtPath } from "./utils/fs"
+import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from "@/integrations/telegram/config"
+import { initTelegramBot, sendHelloMessage } from "@/integrations/telegram/telegramBot"
 /*
 Built using https://github.com/microsoft/vscode-webview-ui-toolkit
 
@@ -51,7 +53,25 @@ https://github.com/microsoft/vscode-webview-ui-toolkit-samples/tree/main/framewo
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
+
 	setupHostProvider(context)
+
+	// Gửi message hello tới Telegram khi extension khởi động (sau khi HostProvider đã setup)
+	try {
+		if (
+			TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID &&
+			TELEGRAM_BOT_TOKEN !== "<YOUR_BOT_TOKEN_HERE>" &&
+			TELEGRAM_CHAT_ID !== "<YOUR_CHAT_ID_HERE>"
+		) {
+			const bot = initTelegramBot(TELEGRAM_BOT_TOKEN)
+			await sendHelloMessage(TELEGRAM_CHAT_ID)
+			Logger.log("Đã gửi message 'hello' tới Telegram Bot.")
+		} else {
+			Logger.log("TELEGRAM_BOT_TOKEN hoặc TELEGRAM_CHAT_ID chưa được cấu hình đúng. Bỏ qua gửi Telegram.")
+		}
+	} catch (err) {
+		Logger.log(`Lỗi khi gửi message Telegram: ${err}`)
+	}
 
 	const webview = (await initialize(context)) as VscodeWebviewProvider
 
