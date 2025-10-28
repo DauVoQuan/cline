@@ -57,15 +57,22 @@ export async function activate(context: vscode.ExtensionContext) {
 	setupHostProvider(context)
 
 	// Gửi message hello tới Telegram khi extension khởi động (sau khi HostProvider đã setup)
+
 	try {
 		if (
 			TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID &&
 			TELEGRAM_BOT_TOKEN !== "<YOUR_BOT_TOKEN_HERE>" &&
 			TELEGRAM_CHAT_ID !== "<YOUR_CHAT_ID_HERE>"
 		) {
-			const bot = initTelegramBot(TELEGRAM_BOT_TOKEN)
+			// Bật polling và lắng nghe message
+			const bot = initTelegramBot(TELEGRAM_BOT_TOKEN, true)
 			await sendHelloMessage(TELEGRAM_CHAT_ID)
 			Logger.log("Đã gửi message 'hello' tới Telegram Bot.")
+			// Đăng ký callback nhận message
+			const { onTelegramMessage } = await import("@/integrations/telegram/telegramBot")
+			onTelegramMessage((msg) => {
+				Logger.log(`[Telegram] Nhận message từ ${msg.from?.username || msg.from?.id}: ${msg.text}`)
+			})
 		} else {
 			Logger.log("TELEGRAM_BOT_TOKEN hoặc TELEGRAM_CHAT_ID chưa được cấu hình đúng. Bỏ qua gửi Telegram.")
 		}
