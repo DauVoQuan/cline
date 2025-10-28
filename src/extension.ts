@@ -59,23 +59,40 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Gửi message hello tới Telegram khi extension khởi động (sau khi HostProvider đã setup)
 
 	try {
-		if (
-			TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID &&
-			TELEGRAM_BOT_TOKEN !== "<YOUR_BOT_TOKEN_HERE>" &&
-			TELEGRAM_CHAT_ID !== "<YOUR_CHAT_ID_HERE>"
-		) {
-			// Bật polling và lắng nghe message
-			const bot = initTelegramBot(TELEGRAM_BOT_TOKEN, true)
-			await sendHelloMessage(TELEGRAM_CHAT_ID)
-			Logger.log("Đã gửi message 'hello' tới Telegram Bot.")
-			// Đăng ký callback nhận message
-			const { onTelegramMessage } = await import("@/integrations/telegram/telegramBot")
-			onTelegramMessage((msg) => {
-				Logger.log(`[Telegram] Nhận message từ ${msg.from?.username || msg.from?.id}: ${msg.text}`)
-			})
-		} else {
-			Logger.log("TELEGRAM_BOT_TOKEN hoặc TELEGRAM_CHAT_ID chưa được cấu hình đúng. Bỏ qua gửi Telegram.")
-		}
+		   if (
+			   TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID &&
+			   TELEGRAM_BOT_TOKEN !== "<YOUR_BOT_TOKEN_HERE>" &&
+			   TELEGRAM_CHAT_ID !== "<YOUR_CHAT_ID_HERE>"
+		   ) {
+			   // Bật polling và lắng nghe message
+			   const bot = initTelegramBot(TELEGRAM_BOT_TOKEN, true)
+			   await sendHelloMessage(TELEGRAM_CHAT_ID)
+			   Logger.log("Đã gửi message 'hello' tới Telegram Bot.")
+			   // Đăng ký callback nhận message
+			   const { onTelegramMessage } = await import("@/integrations/telegram/telegramBot")
+			   onTelegramMessage(async (msg) => {
+				   Logger.log(`[Telegram] Nhận message từ ${msg.from?.username || msg.from?.id}: ${msg.text}`)
+				   try {
+					   const webview = (await import("./core/webview")).WebviewProvider.getInstance()
+					   const controller = webview?.controller
+					   if (controller) {
+						   // Nếu chưa có task, tạo task mới với nội dung đầu tiên là message Telegram
+						   if (!controller.task) {
+							   await controller.handleTaskCreation(msg.text || "")
+						   } else {
+							   // Gửi message như user gửi để AI trả lời
+							   await controller.task.handleWebviewAskResponse("messageResponse", msg.text || "")
+						   }
+					   } else {
+						   Logger.log("Không tìm thấy controller khi nhận message Telegram.")
+					   }
+				   } catch (err) {
+					   Logger.log(`Lỗi khi đẩy message Telegram vào chat: ${err}`)
+				   }
+			   })
+		   } else {
+			   Logger.log("TELEGRAM_BOT_TOKEN hoặc TELEGRAM_CHAT_ID chưa được cấu hình đúng. Bỏ qua gửi Telegram.")
+		   }
 	} catch (err) {
 		Logger.log(`Lỗi khi gửi message Telegram: ${err}`)
 	}
