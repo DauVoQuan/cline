@@ -963,3 +963,4 @@ export class ContextManager {
 		return percentCharactersSaved
 	}
 }
+

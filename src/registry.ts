@@ -46,3 +46,4 @@ export const ExtensionRegistryInfo = {
 	commands: ClineCommands,
 	views: ClineViewIds,
 }
+

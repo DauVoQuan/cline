@@ -136,3 +136,4 @@ second new content
 		expect(result2).to.equal(expectedResult)
 	})
 })
+

@@ -158,3 +158,4 @@ export class BasetenHandler implements ApiHandler {
 		return modelInfo.supportedFeatures ? modelInfo.supportedFeatures.includes("tools") : true
 	}
 }
+

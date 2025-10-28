@@ -124,3 +124,4 @@ export async function tearDown(): Promise<void> {
 	// Dispose all webview instances
 	await WebviewProvider.disposeAllInstances()
 }
+

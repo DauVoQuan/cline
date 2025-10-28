@@ -174,7 +174,7 @@ export class FileContextTracker {
 	 * Marks a file as edited by Cline to prevent false positives in file watchers
 	 */
 	markFileAsEditedByCline(filePath: string): void {
-		this.recentlyEditedByCline.add(filePath)
+	this.recentlyEditedByCline.add(filePath)
 	}
 
 	/**
@@ -309,3 +309,4 @@ export class FileContextTracker {
 		}
 	}
 }
+

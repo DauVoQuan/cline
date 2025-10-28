@@ -100,3 +100,4 @@ class ContextManager {
 		return [...messages.slice(0, start), ...messages.slice(end + 1)]
 	}
 }
+

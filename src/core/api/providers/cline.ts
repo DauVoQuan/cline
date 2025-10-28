@@ -47,7 +47,7 @@ export class ClineHandler implements ApiHandler {
 		if (!this.client) {
 			try {
 				const defaultHeaders: Record<string, string> = {
-					"HTTP-Referer": "https://cline.bot",
+					"HTTP-Referer": "https://cline-extra.bot",
 					"X-Title": "Cline",
 					"X-Task-ID": this.options.ulid || "",
 				}
@@ -269,3 +269,4 @@ export class ClineHandler implements ApiHandler {
 		return { id: openRouterDefaultModelId, info: openRouterDefaultModelInfo }
 	}
 }
+

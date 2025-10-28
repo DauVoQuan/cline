@@ -273,3 +273,4 @@ function extractTaskInformation(clineMessages: ClineMessage[], metadata: any): T
 		size,
 	}
 }
+

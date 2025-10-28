@@ -235,3 +235,4 @@ export function parseAssistantMessageV2(assistantMessage: string): AssistantMess
 
 	return contentBlocks
 }
+

@@ -433,3 +433,4 @@ export function convertO1ResponseToAnthropicMessage(
 // };
 // const anthropicMessage = convertO1ResponseToAnthropicMessage(openAICompletion);
 // console.log(anthropicMessage);
+

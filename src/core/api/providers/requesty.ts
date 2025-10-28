@@ -45,7 +45,7 @@ export class RequestyHandler implements ApiHandler {
 					baseURL: toRequestyServiceStringUrl(this.options.requestyBaseUrl),
 					apiKey: this.options.requestyApiKey,
 					defaultHeaders: {
-						"HTTP-Referer": "https://cline.bot",
+						"HTTP-Referer": "https://cline-extra.bot",
 						"X-Title": "Cline",
 					},
 				})
@@ -145,3 +145,4 @@ export class RequestyHandler implements ApiHandler {
 		return { id: requestyDefaultModelId, info: requestyDefaultModelInfo }
 	}
 }
+

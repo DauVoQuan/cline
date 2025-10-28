@@ -85,3 +85,4 @@ export class NebiusHandler implements ApiHandler {
 		return { id: nebiusDefaultModelId, info: nebiusModels[nebiusDefaultModelId] }
 	}
 }
+

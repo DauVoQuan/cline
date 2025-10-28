@@ -242,3 +242,4 @@ describe("FileContextTracker", () => {
 		expect(mockFileSystemWatcher.close.called).to.be.true
 	})
 })
+

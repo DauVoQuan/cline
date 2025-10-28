@@ -51,3 +51,4 @@ export interface Part {
 	thought?: boolean
 	text?: string
 }
+

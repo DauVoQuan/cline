@@ -829,3 +829,4 @@ export async function constructNewFileContentV2(diffContent: string, originalCon
 	const result = newFileContentConstructor.getResult()
 	return result
 }
+

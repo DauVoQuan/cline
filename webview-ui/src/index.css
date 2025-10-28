@@ -28,7 +28,7 @@ The correct order is:
 @import "tailwindcss/utilities.css" layer(utilities);
 
 /* Configuration directives come after all imports */
-@config "../tailwind.config.mjs";
+/* @config "../tailwind.config.mjs"; */
 
 textarea:focus {
 	outline: 1.5px solid var(--vscode-focusBorder, #007fd4);

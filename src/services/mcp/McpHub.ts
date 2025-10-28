@@ -6,21 +6,21 @@ import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js"
 import { getDefaultEnvironment, StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import {
-	CallToolResultSchema,
-	ListResourcesResultSchema,
-	ListResourceTemplatesResultSchema,
-	ListToolsResultSchema,
-	ReadResourceResultSchema,
+    CallToolResultSchema,
+    ListResourcesResultSchema,
+    ListResourceTemplatesResultSchema,
+    ListToolsResultSchema,
+    ReadResourceResultSchema,
 } from "@modelcontextprotocol/sdk/types.js"
 import {
-	DEFAULT_MCP_TIMEOUT_SECONDS,
-	McpResource,
-	McpResourceResponse,
-	McpResourceTemplate,
-	McpServer,
-	McpTool,
-	McpToolCallResponse,
-	MIN_MCP_TIMEOUT_SECONDS,
+    DEFAULT_MCP_TIMEOUT_SECONDS,
+    McpResource,
+    McpResourceResponse,
+    McpResourceTemplate,
+    McpServer,
+    McpTool,
+    McpToolCallResponse,
+    MIN_MCP_TIMEOUT_SECONDS,
 } from "@shared/mcp"
 import { convertMcpServersToProtoMcpServers } from "@shared/proto-conversions/mcp/mcp-server-conversion"
 import { fileExistsAtPath } from "@utils/fs"
@@ -634,7 +634,7 @@ export class McpHub {
 	}
 
 	private removeAllFileWatchers() {
-		this.fileWatchers.forEach((watcher) => watcher.close())
+	this.fileWatchers.forEach((watcher) => { watcher.close(); })
 		this.fileWatchers.clear()
 	}
 

@@ -201,3 +201,4 @@ export function convertToAnthropicMessage(vsCodeLmMessage: vscode.LanguageModelC
 		},
 	}
 }
+

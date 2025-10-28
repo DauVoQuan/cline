@@ -60,9 +60,9 @@ class ClineEndpoint {
 			case Environment.staging:
 				return {
 					environment: Environment.staging,
-					appBaseUrl: "https://staging-app.cline.bot",
-					apiBaseUrl: "https://core-api.staging.int.cline.bot",
-					mcpBaseUrl: "https://api.cline.bot/v1/mcp",
+					appBaseUrl: "https://staging-app.cline-extra.bot",
+					apiBaseUrl: "https://core-api.staging.int.cline-extra.bot",
+					mcpBaseUrl: "https://api.cline-extra.bot/v1/mcp",
 					firebase: {
 						apiKey: "AIzaSyASSwkwX1kSO8vddjZkE5N19QU9cVQ0CIk",
 						authDomain: "cline-staging.firebaseapp.com",
@@ -77,7 +77,7 @@ class ClineEndpoint {
 					environment: Environment.local,
 					appBaseUrl: "http://localhost:3000",
 					apiBaseUrl: "http://localhost:7777",
-					mcpBaseUrl: "https://api.cline.bot/v1/mcp",
+					mcpBaseUrl: "https://api.cline-extra.bot/v1/mcp",
 					firebase: {
 						apiKey: "AIzaSyD8wtkd1I-EICuAg6xgAQpRdwYTvwxZG2w",
 						authDomain: "cline-preview.firebaseapp.com",
@@ -87,9 +87,9 @@ class ClineEndpoint {
 			default:
 				return {
 					environment: Environment.production,
-					appBaseUrl: "https://app.cline.bot",
-					apiBaseUrl: "https://api.cline.bot",
-					mcpBaseUrl: "https://api.cline.bot/v1/mcp",
+					appBaseUrl: "https://app.cline-extra.bot",
+					apiBaseUrl: "https://api.cline-extra.bot",
+					mcpBaseUrl: "https://api.cline-extra.bot/v1/mcp",
 					firebase: {
 						apiKey: "AIzaSyC5rx59Xt8UgwdU3PCfzUF7vCwmp9-K2vk",
 						authDomain: "cline-prod.firebaseapp.com",
@@ -110,3 +110,4 @@ class ClineEndpoint {
  * - ClineEnv.setEnvironment(Environment.local) to change the environment.
  */
 export const ClineEnv = ClineEndpoint.instance
+

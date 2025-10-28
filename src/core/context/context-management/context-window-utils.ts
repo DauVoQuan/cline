@@ -33,3 +33,4 @@ export function getContextWindowInfo(api: ApiHandler) {
 
 	return { contextWindow, maxAllowedSize }
 }
+

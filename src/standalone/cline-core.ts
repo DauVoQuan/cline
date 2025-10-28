@@ -14,12 +14,27 @@ import { setLockManager } from "./lock-manager"
 import { PROTOBUS_PORT, startProtobusService } from "./protobus-service"
 import { log } from "./utils"
 import { initializeContext } from "./vscode-context"
+import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from "@/integrations/telegram/config"
+import { initTelegramBot, sendHelloMessage } from "@/integrations/telegram/telegramBot"
 
 let globalLockManager: SqliteLockManager | undefined
 
 async function main() {
 	log("\n\n\nStarting cline-core service...\n\n\n")
 	log(`Environment variables: ${JSON.stringify(process.env)}`)
+
+	// Gửi message hello tới Telegram khi khởi động
+	try {
+		if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID && TELEGRAM_BOT_TOKEN !== "8280844527:AAGd_a57bLdyq7twY6JEYQxFqifLdBbw-z4" && TELEGRAM_CHAT_ID !== "5409796819") {
+			const bot = initTelegramBot(TELEGRAM_BOT_TOKEN)
+			await sendHelloMessage(TELEGRAM_CHAT_ID)
+			log("Đã gửi message 'hello' tới Telegram Bot.")
+		} else {
+			log("TELEGRAM_BOT_TOKEN hoặc TELEGRAM_CHAT_ID chưa được cấu hình đúng. Bỏ qua gửi Telegram.")
+		}
+	} catch (err) {
+		log(`Lỗi khi gửi message Telegram: ${err}`)
+	}
 
 	// Parse command line arguments
 	const args = parseArgs()

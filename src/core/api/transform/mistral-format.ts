@@ -59,3 +59,4 @@ export function convertToMistralMessages(anthropicMessages: Anthropic.Messages.M
 
 	return mistralMessages
 }
+

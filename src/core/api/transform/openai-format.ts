@@ -329,3 +329,4 @@ export function convertToAnthropicMessage(completion: OpenAI.Chat.Completions.Ch
 	}
 	return anthropicMessage
 }
+

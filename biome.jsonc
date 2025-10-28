@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.1.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.1/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -18,7 +18,8 @@
 	"linter": {
 		"enabled": true,
 		"domains": {
-			"react": "recommended"
+			"react": "recommended",
+			"tailwind": "recommended"
 		},
 		// Ideally we would want to turn on all the rules that are currently off,
 		// keeping them off currently to make sure only changes on the migrations
@@ -163,4 +164,5 @@
 			]
 		}
 	]
+    
 }

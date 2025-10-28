@@ -1039,3 +1039,4 @@ export class SapAiCoreHandler implements ApiHandler {
 		return convertToOpenAiMessages(messages) as ChatMessages
 	}
 }
+

@@ -1,6 +1,6 @@
 {
-	"name": "claude-dev",
-	"displayName": "Cline",
+	"name": "cline-extra",
+	"displayName": "Cline-Extra",
 	"description": "Autonomous coding agent right in your IDE, capable of creating/editing files, running commands, using the browser, and more with your permission every step of the way.",
 	"version": "3.33.1",
 	"icon": "assets/icons/icon.png",
@@ -11,7 +11,7 @@
 		"name": "Cline Bot Inc."
 	},
 	"license": "Apache-2.0",
-	"publisher": "saoudrizwan",
+	"publisher": "cline-extra",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/cline/cline"
@@ -37,7 +37,8 @@
 		"chatgpt",
 		"sonnet",
 		"ai",
-		"llama"
+		"llama",
+		"telegram"
 	],
 	"activationEvents": [
 		"onLanguage",
@@ -48,9 +49,9 @@
 	"contributes": {
 		"walkthroughs": [
 			{
-				"id": "ClineWalkthrough",
-				"title": "Meet Cline, your new coding partner",
-				"description": "Cline codes like a developer because it thinks like one. Here are 5 ways to put it to work:",
+				"id": "ClineExtraWalkthrough",
+				"title": "Meet Cline-Extra, your new coding partner",
+				"description": "Cline-Extra codes like a developer because it thinks like one. Here are 5 ways to put it to work:",
 				"steps": [
 					{
 						"id": "welcome",
@@ -101,17 +102,17 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "claude-dev-ActivityBar",
-					"title": "Cline",
+					"id": "cline-extra-ActivityBar",
+					"title": "Cline-Extra",
 					"icon": "assets/icons/icon.svg"
 				}
 			]
 		},
 		"views": {
-			"claude-dev-ActivityBar": [
+			"cline-extra-ActivityBar": [
 				{
 					"type": "webview",
-					"id": "claude-dev.SidebarProvider",
+					"id": "cline-extra.SidebarProvider",
 					"name": "",
 					"icon": "assets/icons/icon.svg"
 				}
@@ -119,90 +120,90 @@
 		},
 		"commands": [
 			{
-				"command": "cline.plusButtonClicked",
+				"command": "cline-extra.plusButtonClicked",
 				"title": "New Task",
 				"icon": "$(add)"
 			},
 			{
-				"command": "cline.mcpButtonClicked",
+				"command": "cline-extra.mcpButtonClicked",
 				"title": "MCP Servers",
 				"icon": "$(server)"
 			},
 			{
-				"command": "cline.historyButtonClicked",
+				"command": "cline-extra.historyButtonClicked",
 				"title": "History",
 				"icon": "$(history)"
 			},
 			{
-				"command": "cline.accountButtonClicked",
+				"command": "cline-extra.accountButtonClicked",
 				"title": "Account",
 				"icon": "$(account)"
 			},
 			{
-				"command": "cline.settingsButtonClicked",
+				"command": "cline-extra.settingsButtonClicked",
 				"title": "Settings",
 				"icon": "$(settings-gear)"
 			},
 			{
-				"command": "cline.dev.createTestTasks",
+				"command": "cline-extra.dev.createTestTasks",
 				"title": "Create Test Tasks",
-				"category": "Cline",
-				"when": "cline.isDevMode"
+				"category": "Cline-Extra",
+				"when": "cline-extra.isDevMode"
 			},
 			{
-				"command": "cline.addToChat",
-				"title": "Add to Cline",
-				"category": "Cline"
+				"command": "cline-extra.addToChat",
+				"title": "Add to Cline-Extra",
+				"category": "Cline-Extra"
 			},
 			{
-				"command": "cline.addTerminalOutputToChat",
-				"title": "Add to Cline",
-				"category": "Cline"
+				"command": "cline-extra.addTerminalOutputToChat",
+				"title": "Add to Cline-Extra",
+				"category": "Cline-Extra"
 			},
 			{
-				"command": "cline.focusChatInput",
+				"command": "cline-extra.focusChatInput",
 				"title": "Jump to Chat Input",
-				"category": "Cline"
+				"category": "Cline-Extra"
 			},
 			{
-				"command": "cline.generateGitCommitMessage",
-				"title": "Generate Commit Message with Cline",
-				"category": "Cline",
+				"command": "cline-extra.generateGitCommitMessage",
+				"title": "Generate Commit Message with Cline-Extra",
+				"category": "Cline-Extra",
 				"icon": {
 					"light": "assets/icons/robot_panel_light.png",
 					"dark": "assets/icons/robot_panel_dark.png"
 				}
 			},
 			{
-				"command": "cline.abortGitCommitMessage",
-				"title": "Generate Commit Message with Cline - Stop",
-				"category": "Cline",
+				"command": "cline-extra.abortGitCommitMessage",
+				"title": "Generate Commit Message with Cline-Extra - Stop",
+				"category": "Cline-Extra",
 				"icon": "$(debug-stop)"
 			},
 			{
-				"command": "cline.explainCode",
-				"title": "Explain with Cline",
-				"category": "Cline"
+				"command": "cline-extra.explainCode",
+				"title": "Explain with Cline-Extra",
+				"category": "Cline-Extra"
 			},
 			{
-				"command": "cline.improveCode",
-				"title": "Improve with Cline",
-				"category": "Cline"
+				"command": "cline-extra.improveCode",
+				"title": "Improve with Cline-Extra",
+				"category": "Cline-Extra"
 			},
 			{
-				"command": "cline.openWalkthrough",
+				"command": "cline-extra.openWalkthrough",
 				"title": "Open Walkthrough",
-				"category": "Cline"
+				"category": "Cline-Extra"
 			},
 			{
-				"command": "cline.reconstructTaskHistory",
+				"command": "cline-extra.reconstructTaskHistory",
 				"title": "Reconstruct Task History",
-				"category": "Cline"
+				"category": "Cline-Extra"
 			}
 		],
 		"keybindings": [
 			{
-				"command": "cline.addToChat",
+				"command": "cline-extra.addToChat",
 				"key": "cmd+'",
 				"mac": "cmd+'",
 				"win": "ctrl+'",
@@ -210,11 +211,11 @@
 				"when": "editorHasSelection"
 			},
 			{
-				"command": "cline.generateGitCommitMessage",
+				"command": "cline-extra.generateGitCommitMessage",
 				"when": "config.git.enabled && scmProvider == git"
 			},
 			{
-				"command": "cline.focusChatInput",
+				"command": "cline-extra.focusChatInput",
 				"key": "cmd+'",
 				"mac": "cmd+'",
 				"win": "ctrl+'",
@@ -225,69 +226,69 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "cline.plusButtonClicked",
+					"command": "cline-extra.plusButtonClicked",
 					"group": "navigation@1",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-extra.SidebarProvider"
 				},
 				{
-					"command": "cline.mcpButtonClicked",
+					"command": "cline-extra.mcpButtonClicked",
 					"group": "navigation@2",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-extra.SidebarProvider"
 				},
 				{
-					"command": "cline.historyButtonClicked",
+					"command": "cline-extra.historyButtonClicked",
 					"group": "navigation@3",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-extra.SidebarProvider"
 				},
 				{
-					"command": "cline.accountButtonClicked",
+					"command": "cline-extra.accountButtonClicked",
 					"group": "navigation@5",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-extra.SidebarProvider"
 				},
 				{
-					"command": "cline.settingsButtonClicked",
+					"command": "cline-extra.settingsButtonClicked",
 					"group": "navigation@6",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-extra.SidebarProvider"
 				}
 			],
 			"editor/context": [
 				{
-					"command": "cline.addToChat",
+					"command": "cline-extra.addToChat",
 					"group": "navigation",
 					"when": "editorHasSelection"
 				}
 			],
 			"terminal/context": [
 				{
-					"command": "cline.addTerminalOutputToChat",
+					"command": "cline-extra.addTerminalOutputToChat",
 					"group": "navigation"
 				}
 			],
 			"scm/title": [
 				{
-					"command": "cline.generateGitCommitMessage",
+					"command": "cline-extra.generateGitCommitMessage",
 					"group": "navigation",
-					"when": "config.git.enabled && scmProvider == git && !cline.isGeneratingCommit"
+					"when": "config.git.enabled && scmProvider == git && !cline-extra.isGeneratingCommit"
 				},
 				{
-					"command": "cline.abortGitCommitMessage",
+					"command": "cline-extra.abortGitCommitMessage",
 					"group": "navigation",
-					"when": "config.git.enabled && scmProvider == git && cline.isGeneratingCommit"
+					"when": "config.git.enabled && scmProvider == git && cline-extra.isGeneratingCommit"
 				}
 			],
 			"commandPalette": [
 				{
-					"command": "cline.generateGitCommitMessage",
-					"when": "config.git.enabled && scmProvider == git && !cline.isGeneratingCommit"
+					"command": "cline-extra.generateGitCommitMessage",
+					"when": "config.git.enabled && scmProvider == git && !cline-extra.isGeneratingCommit"
 				},
 				{
-					"command": "cline.abortGitCommitMessage",
-					"when": "config.git.enabled && scmProvider == git && cline.isGeneratingCommit"
+					"command": "cline-extra.abortGitCommitMessage",
+					"when": "config.git.enabled && scmProvider == git && cline-extra.isGeneratingCommit"
 				}
 			]
 		},
 		"configuration": {
-			"title": "Cline",
+			"title": "Cline-Extra",
 			"properties": {}
 		}
 	},
@@ -318,7 +319,7 @@
 		"clean:all": "npm run clean:build && npm run clean:deps",
 		"compile-tests": "node ./scripts/build-tests.js",
 		"watch-tests": "tsc -p . -w --outDir out",
-		"check-types": "npm run protos && npx tsc --noEmit && cd webview-ui && npx tsc -b --noEmit",
+		"check-types": "npx tsc --noEmit && cd webview-ui && npx tsc -b",
 		"lint": "biome lint --no-errors-on-unmatched --files-ignore-unknown=true --diagnostic-level=error && buf lint",
 		"format": "biome format --changed --no-errors-on-unmatched --files-ignore-unknown=true --diagnostic-level=error",
 		"format:fix": "biome check --changed --no-errors-on-unmatched --files-ignore-unknown=true --write",
@@ -361,6 +362,7 @@
 		"@biomejs/biome": "^2.1.4",
 		"@bufbuild/buf": "^1.54.0",
 		"@changesets/cli": "^2.27.12",
+		"@storybook/react-vite": "^9.1.15",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/chai": "^5.0.1",
 		"@types/clone-deep": "^4.0.4",
@@ -368,10 +370,14 @@
 		"@types/get-folder-size": "^3.0.4",
 		"@types/mocha": "^10.0.7",
 		"@types/node": "20.x",
+		"@types/node-telegram-bot-api": "^0.64.12",
 		"@types/pdf-parse": "^1.1.4",
 		"@types/proxyquire": "^1.3.31",
+		"@types/react": "^19.2.2",
+		"@types/react-dom": "^19.2.2",
 		"@types/should": "^11.2.0",
 		"@types/sinon": "^17.0.4",
+		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/turndown": "^5.0.5",
 		"@types/vscode": "1.84.0",
 		"@vscode/test-cli": "^0.0.10",
@@ -396,9 +402,10 @@
 		"sinon": "^19.0.2",
 		"tree-kill": "^1.2.2",
 		"ts-node": "^10.9.2",
-		"ts-proto": "^2.6.1",
+		"ts-proto": "^2.8.1",
 		"tsconfig-paths": "^4.2.0",
-		"typescript": "^5.4.5"
+		"typescript": "^5.4.5",
+		"vitest": "^4.0.3"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.37.0",
@@ -466,6 +473,7 @@
 		"mammoth": "^1.8.0",
 		"nice-grpc": "^2.1.12",
 		"node-machine-id": "^1.1.12",
+		"node-telegram-bot-api": "^0.66.0",
 		"ollama": "^0.5.13",
 		"open": "^10.1.2",
 		"open-graph-scraper": "^6.9.0",
@@ -477,6 +485,8 @@
 		"posthog-node": "^5.8.0",
 		"puppeteer-chromium-resolver": "^23.0.0",
 		"puppeteer-core": "^23.4.0",
+		"react": "^19.2.0",
+		"react-dom": "^19.2.0",
 		"reconnecting-eventsource": "^1.6.4",
 		"serialize-error": "^11.0.3",
 		"simple-git": "^3.27.0",

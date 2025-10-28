@@ -255,3 +255,4 @@ export class CerebrasHandler implements ApiHandler {
 		return inputCost + outputCost
 	}
 }
+
